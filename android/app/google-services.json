@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "11704534300",
+    "project_id": "chatbox-55db8",
+    "storage_bucket": "chatbox-55db8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:11704534300:android:8d98d4ae27d793bff026d9",
+        "android_client_info": {
+          "package_name": "com.example.brezze_learn_test"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBu_W13AHh4iUIgoDhS6qtepbjagOeaOH0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
