@@ -119,3 +119,6 @@ Chatbox represents the culmination of thoughtful design decisions, robust archit
 
 
 That's it! You're now ready to experience Chatbox firsthand.
+
+Your's Truly.
+David OH!
