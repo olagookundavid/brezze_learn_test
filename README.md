@@ -40,35 +40,40 @@ To run the Chatbox app on your local machine, follow these simple steps:
 ### Download Android APK
 - [Download Chatbox Android APK](https://drive.google.com/file/d/1KWxXPLgyg1XcFRus6leFHftiIw_xhF6_/view?usp=sharing)
 ### Images
-<div style="display: flex; flex-wrap: wrap; justify-content: center;">
 
-<!-- First Row -->
-<div style="margin: 10px;">
-    <img src="https://github.com/olagookundavid/kkk/assets/63510672/08f42a0c-4b75-4d5e-b0fc-652b95440931" alt="Image 1" style="width: 200px; height: 200px;">
+<div style="display: flex; justify-content: center;">
+
+<div style="margin: 10px; display: flex;">
+    <div style="margin-right: 10px;">
+        <img src="https://github.com/olagookundavid/kkk/assets/63510672/08f42a0c-4b75-4d5e-b0fc-652b95440931" alt="Image 1" style="width: 200px; height: 200px;">
+    </div>
+    <div>
+        <img src="https://github.com/olagookundavid/kkk/assets/63510672/8cb04a8e-30a6-4267-a4b9-b4daa3f2daf9" alt="Image 2" style="width: 200px; height: 200px;">
+    </div>
 </div>
 
-<div style="margin: 10px;">
-    <img src="https://github.com/olagookundavid/kkk/assets/63510672/8cb04a8e-30a6-4267-a4b9-b4daa3f2daf9" alt="Image 2" style="width: 200px; height: 200px;">
+
+<div style="margin: 10px; display: flex;">
+    <div style="margin-right: 10px;">
+        <img src="https://github.com/olagookundavid/kkk/assets/63510672/8f55cc6a-f7d3-4d47-895e-cf2d221da75c" alt="Image 3" style="width: 200px; height: 200px;">
+    </div>
+    <div>
+        <img src="https://github.com/olagookundavid/kkk/assets/63510672/d3a8d2c0-529d-4769-8361-57301e73852b" alt="Image 4" style="width: 200px; height: 200px;">
+    </div>
 </div>
 
-<div style="margin: 10px;">
-    <img src="https://github.com/olagookundavid/kkk/assets/63510672/8f55cc6a-f7d3-4d47-895e-cf2d221da75c" alt="Image 3" style="width: 200px; height: 200px;">
-</div>
 
-<!-- Second Row -->
-<div style="margin: 10px;">
-    <img src="https://github.com/olagookundavid/kkk/assets/63510672/d3a8d2c0-529d-4769-8361-57301e73852b" alt="Image 4" style="width: 200px; height: 200px;">
-</div>
-
-<div style="margin: 10px;">
-    <img src="https://github.com/olagookundavid/kkk/assets/63510672/3c7c6fe3-ea7a-4352-9182-7931b0648520" alt="Image 5" style="width: 200px; height: 200px;">
-</div>
-
-<div style="margin: 10px;">
-    <img src="https://github.com/olagookundavid/kkk/assets/63510672/ef71cb1a-90a2-42b1-9288-a75d5080f86a" alt="Image 6" style="width: 200px; height: 200px;">
+<div style="margin: 10px; display: flex;">
+    <div style="margin-right: 10px;">
+        <img src="https://github.com/olagookundavid/kkk/assets/63510672/3c7c6fe3-ea7a-4352-9182-7931b0648520" alt="Image 5" style="width: 200px; height: 200px;">
+    </div>
+    <div>
+        <img src="https://github.com/olagookundavid/kkk/assets/63510672/ef71cb1a-90a2-42b1-9288-a75d5080f86a" alt="Image 6" style="width: 200px; height: 200px;">
+    </div>
 </div>
 
 </div>
+
 
 
 ### Github Repo
