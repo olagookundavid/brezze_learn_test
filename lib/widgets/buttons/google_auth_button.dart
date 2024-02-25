@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 class GoogleAuthButton extends StatelessWidget {
   final String text;
-  void Function()? onPressed;
-  GoogleAuthButton({super.key, required this.text, required this.onPressed});
+  final void Function()? onPressed;
+  const GoogleAuthButton(
+      {super.key, required this.text, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {

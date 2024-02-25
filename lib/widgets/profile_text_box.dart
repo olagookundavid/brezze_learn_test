@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 class ProfileTextBox extends StatefulWidget {
   final String text;
   final String sectionName;
-  void Function()? onPressed;
-  ProfileTextBox(
+  final void Function()? onPressed;
+  const ProfileTextBox(
       {super.key,
       required this.text,
       required this.sectionName,
@@ -18,7 +18,7 @@ class _ProfileTextBoxState extends State<ProfileTextBox> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: EdgeInsets.only(left: 15, bottom: 15),
+        padding: const EdgeInsets.only(left: 15, bottom: 15),
         margin: const EdgeInsets.only(left: 20, right: 20, top: 20),
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey.shade400),
@@ -29,7 +29,7 @@ class _ProfileTextBoxState extends State<ProfileTextBox> {
               color: Colors.grey.withOpacity(0.3),
               spreadRadius: 1,
               blurRadius: 5,
-              offset: Offset(0, 3), // changes position of shadow
+              offset: const Offset(0, 3), // changes position of shadow
             ),
           ],
         ),

@@ -1,16 +1,16 @@
 import 'dart:io';
+import 'package:brezze_learn_test/auth/notifiiers/auth_notifier.dart';
+import 'package:brezze_learn_test/auth/notifiiers/profile_notifier.dart';
+import 'package:brezze_learn_test/helper/alert_box.dart';
 import 'package:brezze_learn_test/helper/utils.dart';
+import 'package:brezze_learn_test/widgets/cache_image.dart';
 import 'package:brezze_learn_test/widgets/profile_text_box.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-
-import '../controller/auth_controller.dart';
+import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -20,12 +20,6 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-// Get Current User
-  final currentUser = FirebaseAuth.instance.currentUser!;
-
-// Reference to ALL Users called usersCollection
-  final usersCollection = FirebaseFirestore.instance.collection('users');
-
 // Edit Field
   Future<void> editField(String field) async {
     // create empty string value
@@ -65,19 +59,35 @@ class _ProfilePageState extends State<ProfilePage> {
             children: [
               // save button
               Padding(
-                padding: const EdgeInsets.only(bottom: 15.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    // pop dialog with new value of edit field
-                    Navigator.of(context).pop(newValue);
-                  },
-                  child: Text(
-                    'Save',
-                    style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
+                padding: EdgeInsets.only(bottom: 15.w),
+                child: Consumer<ProfileViewModel>(
+                    builder: (context, profile, child) {
+                  return profile.loading
+                      ? const CircularProgressIndicator()
+                      : ElevatedButton(
+                          onPressed: () async {
+                            if (newValue.isNotEmpty) {
+                              // current user from usersCollection -> update field with new value
+                              await profile.updateProfile(
+                                  Provider.of<AuthViewModel>(context,
+                                          listen: false)
+                                      .user!
+                                      .email!,
+                                  field,
+                                  newValue);
+                            }
+                            if (mounted) {
+                              Navigator.of(context).pop(newValue);
+                            }
+                          },
+                          child: Text(
+                            'Save',
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        );
+                }),
               ),
             ],
           ),
@@ -86,10 +96,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
 
     // update new username to Firestore ONLY if edit field has data
-    if (newValue.isNotEmpty) {
-      // current user from usersCollection -> update field with new value
-      await usersCollection.doc(currentUser.email).update({field: newValue});
-    }
   }
 
   // Image Picker
@@ -119,14 +125,12 @@ class _ProfilePageState extends State<ProfilePage> {
                     }
                   }
                 },
-                child: const Icon(
+                child: Icon(
                   Icons.camera_alt,
-                  size: 40,
+                  size: 40.r,
                 ),
               ),
-              const SizedBox(
-                width: 30,
-              ),
+              30.pw,
               InkWell(
                 onTap: () async {
                   final ImagePicker picker = ImagePicker();
@@ -141,9 +145,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     }
                   }
                 },
-                child: const Icon(
+                child: Icon(
                   Icons.photo_library_rounded,
-                  size: 40,
+                  size: 40.r,
                 ),
               ),
             ],
@@ -156,20 +160,18 @@ class _ProfilePageState extends State<ProfilePage> {
 // Profile Pic File Image
   File? profileImage;
 
-  // Auth Controller
-  AuthController? authController;
-
 // Init State
   @override
   void initState() {
     super.initState();
-    authController = Get.put(AuthController());
   }
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = Provider.of<AuthViewModel>(context).user;
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         centerTitle: true,
         elevation: 0,
         backgroundColor: Theme.of(context).primaryColor,
@@ -186,14 +188,13 @@ class _ProfilePageState extends State<ProfilePage> {
         stream: FirebaseFirestore.instance
             .collection('users')
             // find doc of currentUser.email
-            .doc(currentUser.email)
+            .doc(currentUser?.email)
             .snapshots(),
         builder: (context, snapshot) {
           // get user data
           if (snapshot.hasData) {
             // store found data in 'userData' variable
             final userData = snapshot.data!.data() as Map<String, dynamic>;
-            print(userData);
 
             // display as ListView
             return ListView(
@@ -210,17 +211,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       height: 250.h,
                       child: ClipOval(
                         child: profileImage == null
-                            ? FadeInImage(
-                                fit: BoxFit.cover,
-                                placeholder: const AssetImage(
-                                    'lib/assets/images/placeholderimage.png'),
-                                image: NetworkImage(userData['avatar']),
-                                imageErrorBuilder:
-                                    (context, error, stackTrace) {
-                                  return Image.asset(
-                                      'lib/assets/images/placeholderimage.png',
-                                      fit: BoxFit.fill);
-                                })
+                            ? CachedImageHelper(url: userData['avatar'])
                             : ClipOval(
                                 child: Container(
                                   decoration: BoxDecoration(
@@ -237,15 +228,13 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
 
-                const SizedBox(
-                  height: 20,
-                ),
+                20.ph,
 
                 // User Email
                 Text(
-                  currentUser.email!,
-                  style: const TextStyle(
-                      fontSize: 14,
+                  currentUser!.email!,
+                  style: TextStyle(
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.bold,
                       color: Colors.grey),
                   textAlign: TextAlign.center,
@@ -253,11 +242,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
 // User Details
                 Padding(
-                  padding: const EdgeInsets.only(left: 25.0, top: 20),
+                  padding: EdgeInsets.only(left: 25.w, top: 20.h),
                   child: Text('My Details',
                       style: TextStyle(
                           color: Theme.of(context).primaryColor,
-                          fontSize: 18,
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.bold)),
                 ),
 
@@ -277,33 +266,50 @@ class _ProfilePageState extends State<ProfilePage> {
                   onPressed: () => editField('bio'),
                 ),
 
-                const SizedBox(height: 40),
+                40.ph,
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                        ),
-                        onPressed: () async {
-                          // Save image to firebase storage
-                          String imageUrl = await authController!
-                              .uploadImageToFirebaseStorage(profileImage!);
-
-                          await usersCollection
-                              .doc(currentUser.email)
-                              .update({'avatar': imageUrl});
-                        },
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 15.w),
-                          child: Text(
-                            'Save',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).primaryColorLight),
-                          ),
-                        )),
+                    Consumer<ProfileViewModel>(
+                        builder: (context, profile, child) {
+                      return profile.loading
+                          ? const CircularProgressIndicator()
+                          : ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Theme.of(context).primaryColor,
+                              ),
+                              onPressed: () async {
+                                // Save image to firebase storage
+                                if (profileImage == null) {
+                                  return;
+                                }
+                                await profile
+                                    .uploadProfileImageToFirebaseStorage(
+                                        profileImage!, currentUser.email!);
+                                if (profile.error != null) {
+                                  // Show a snackbar with the error message
+                                  if (mounted) {
+                                    getAlert(context, profile.error!);
+                                  }
+                                  return;
+                                }
+                                if (mounted) {
+                                  getAlert(context,
+                                      'Successfully updated profile picture!');
+                                }
+                              },
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 15.w),
+                                child: Text(
+                                  'Save',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          Theme.of(context).primaryColorLight),
+                                ),
+                              ));
+                    }),
                   ],
                 )
               ],

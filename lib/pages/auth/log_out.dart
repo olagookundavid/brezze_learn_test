@@ -1,4 +1,6 @@
+import 'package:brezze_learn_test/auth/login_or_register.dart';
 import 'package:brezze_learn_test/auth/notifiiers/auth_notifier.dart';
+import 'package:brezze_learn_test/helper/alert_box.dart';
 import 'package:brezze_learn_test/helper/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -58,26 +60,43 @@ class Logout extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Consumer<AuthenticationNotifier>(
-                          builder: (context, value, child) {
-                        final auth = context.read<AuthenticationNotifier>();
-                        return ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white),
-                          onPressed: () {
-                            auth.logout();
-                            Navigator.pop(context);
-                          },
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20.w),
-                            child: const Text(
-                              'Logout',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.deepPurple),
-                            ),
-                          ),
-                        );
+                      Consumer<AuthViewModel>(builder: (context, value, child) {
+                        AuthViewModel auth =
+                            Provider.of<AuthViewModel>(context, listen: false);
+                        return auth.isLoading
+                            ? const CircularProgressIndicator()
+                            : ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white),
+                                onPressed: () {
+                                  auth.signOut();
+                                  if (auth.errorMessage != null) {
+                                    // Show a snackbar with the error message
+
+                                    getAlert(context, auth.errorMessage!);
+                                    return;
+                                  }
+
+                                  Navigator.pop(context);
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const LoginOrRegister()),
+                                    (Route<dynamic> route) => false,
+                                  );
+                                },
+                                child: Padding(
+                                  padding:
+                                      EdgeInsets.symmetric(horizontal: 20.w),
+                                  child: const Text(
+                                    'Logout',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.deepPurple),
+                                  ),
+                                ),
+                              );
                       }),
                       10.ph,
                       ElevatedButton(

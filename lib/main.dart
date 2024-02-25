@@ -1,6 +1,9 @@
 import 'package:brezze_learn_test/auth/auth.dart';
 import 'package:brezze_learn_test/auth/notifiiers/auth_notifier.dart';
+import 'package:brezze_learn_test/auth/notifiiers/post_notifier.dart';
+import 'package:brezze_learn_test/auth/notifiiers/profile_notifier.dart';
 import 'package:brezze_learn_test/helper/storage_class.dart';
+import 'package:fast_cached_network_image/fast_cached_network_image.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,15 +19,16 @@ void main() async {
   await Firebase.initializeApp();
   await Hive.initFlutter();
   await Hive.openBox(HiveKeys.appBox);
+
+  await FastCachedImageConfig.init(clearCacheAfter: const Duration(days: 3));
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 
-  runApp(ChangeNotifierProvider(
-    create: (context) => AuthenticationNotifier(),
-    child: const MyApp(),
-  ));
+  runApp(
+    const MyApp(),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -32,43 +36,50 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(
-      useInheritedMediaQuery: true,
-      minTextAdapt: true,
-      designSize: const Size(375, 812),
-      builder: (context, _) => GestureDetector(
-          onTap: () {
-            unfocus();
-          },
-          child: GetMaterialApp(
-              darkTheme: ThemeData.dark(
-                useMaterial3: true,
-              ),
-              theme: ThemeData(
-                useMaterial3: true,
-                colorScheme: ColorScheme(
-                  brightness: Brightness.light,
-                  primary: Colors.deepPurple,
-                  onPrimary: Colors.white, // Text on primary color
-                  background: Colors.white,
-                  onSecondary: Colors.white,
-                  error: Colors.red,
-                  onBackground: Colors.white,
-                  onError: Colors.deepPurple,
-                  onSurface: Colors.black, // colors for text fields
-                  secondary: Colors.white,
-                  surface: Colors.grey.shade200,
-
-                  // colors for widgets
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => AuthViewModel()),
+        ChangeNotifierProvider(create: (context) => ProfileViewModel()),
+        ChangeNotifierProvider(create: (context) => PostViewModel())
+      ],
+      child: ScreenUtilInit(
+        useInheritedMediaQuery: false,
+        minTextAdapt: true,
+        designSize: const Size(375, 812),
+        builder: (context, _) => GestureDetector(
+            onTap: () {
+              unfocus();
+            },
+            child: GetMaterialApp(
+                darkTheme: ThemeData.dark(
+                  useMaterial3: true,
                 ),
-                splashColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                primaryColor: Colors.deepPurple,
-                fontFamily: GoogleFonts.poppins().fontFamily,
-              ),
-              debugShowCheckedModeBanner: false,
-              title: 'ChatBox',
-              home: const AuthPage())),
+                theme: ThemeData(
+                  useMaterial3: true,
+                  colorScheme: ColorScheme(
+                    brightness: Brightness.light,
+                    primary: Colors.deepPurple,
+                    onPrimary: Colors.white, // Text on primary color
+                    background: Colors.white,
+                    onSecondary: Colors.white,
+                    error: Colors.red,
+                    onBackground: Colors.white,
+                    onError: Colors.deepPurple,
+                    onSurface: Colors.black, // colors for text fields
+                    secondary: Colors.white,
+                    surface: Colors.grey.shade200,
+
+                    // colors for widgets
+                  ),
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  primaryColor: Colors.deepPurple,
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                ),
+                debugShowCheckedModeBanner: false,
+                title: 'ChatBox',
+                home: const AuthPage())),
+      ),
     );
   }
 }

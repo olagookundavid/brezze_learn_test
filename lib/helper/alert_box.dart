@@ -1,5 +1,6 @@
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 class AlertFlushbar {
   static void showNotification({
@@ -48,4 +49,14 @@ class AlertFlushbar {
       messageSize: 18,
     ).show(context);
   }
+}
+
+getAlert(BuildContext context, String msg) {
+  SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+    AlertFlushbar.showNotification(
+      isWarning: false,
+      context: context,
+      message: msg,
+    );
+  });
 }

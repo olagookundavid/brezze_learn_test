@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'auth/signup_page.dart';
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
@@ -9,72 +8,69 @@ class WelcomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 // Height based on device
-    final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
         backgroundColor: Colors.white,
-        body: Container(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-// Logo & Slogan
-              Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 50.0),
-                    child: Text(
-                      'ChatBox',
-                      style: GoogleFonts.rammettoOne(
-                          fontSize: 60, color: Theme.of(context).primaryColor),
-                    ),
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // Logo & Slogan
+            Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(top: 50.h),
+                  child: Text(
+                    'ChatBox',
+                    style: GoogleFonts.rammettoOne(
+                        fontSize: 60.sp, color: Theme.of(context).primaryColor),
                   ),
-                ],
-              ),
+                ),
+              ],
+            ),
 
-// Welcome Image
-              const Column(
-                children: [
-                  // Welcome Image
-                  Padding(
-                    padding: EdgeInsets.only(left: 10.0, right: 10.0),
-                    child: Image(
-                      image: AssetImage('lib/assets/images/welcome.png'),
-                    ),
+            // Welcome Image
+            Column(
+              children: [
+                // Welcome Image
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10.w),
+                  child: const Image(
+                    image: AssetImage('lib/assets/images/welcome.png'),
                   ),
-                ],
-              ),
+                ),
+              ],
+            ),
 
-              const Padding(
-                padding: EdgeInsets.only(left: 10.0, right: 10.0, bottom: 20.0),
-              ),
+            Padding(
+              padding: EdgeInsets.only(left: 10.w, right: 10.w, bottom: 20.h),
+            ),
 
-// Sign Up Button
-              Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 30.0, left: 30.0),
-                      child: ElevatedButton(
-                        // go to register page
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                            // shape: RoundedRectangleBorder(),
-                            backgroundColor: Theme.of(context).primaryColor),
-                        child: const Padding(
-                          padding: EdgeInsets.all(15.0),
-                          child: Text('Get Started',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  color: Colors.white)),
-                        ),
+            // Sign Up Button
+            Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(right: 30.w, left: 30.w),
+                    child: ElevatedButton(
+                      // go to register page
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                          // shape: RoundedRectangleBorder(),
+                          backgroundColor: Theme.of(context).primaryColor),
+                      child: Padding(
+                        padding: EdgeInsets.all(15.h),
+                        child: Text('Get Started',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18.sp,
+                                color: Colors.white)),
                       ),
                     ),
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ));
   }
 }

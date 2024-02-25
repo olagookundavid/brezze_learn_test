@@ -1,9 +1,13 @@
+import 'package:brezze_learn_test/auth/notifiiers/auth_notifier.dart';
 import 'package:brezze_learn_test/components/password_field.dart';
 import 'package:brezze_learn_test/components/text_field.dart';
+import 'package:brezze_learn_test/helper/alert_box.dart';
+import 'package:brezze_learn_test/helper/utils.dart';
+import 'package:brezze_learn_test/pages/landing_page.dart';
 import 'package:brezze_learn_test/widgets/buttons/login_register_button.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
 class SignUpPage extends StatefulWidget {
   final Function()? onPressed;
@@ -19,63 +23,6 @@ class _SignUpPageState extends State<SignUpPage> {
   final emailTextController = TextEditingController();
   final passwordTextController = TextEditingController();
 
-// Sign User Up
-  void signUp() async {
-    showDialog(
-      context: context,
-      builder: (context) => Center(
-        child: CircularProgressIndicator(color: Theme.of(context).primaryColor),
-      ),
-    );
-
-    // error handlers
-    try {
-// Create the User
-      UserCredential userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(
-              email: emailTextController.text,
-              password: passwordTextController.text);
-
-      // after creating the user, create new collection called "users"
-      FirebaseFirestore.instance
-          // create the collection
-          .collection('users')
-          // create doc for userCredential
-          .doc(userCredential.user!.email)
-          // set 'username' -> text before @ sign in email
-          .set({
-        'username': fullNameTextController.text,
-        'bio': 'Enter your bio here...',
-        'avatar': ''
-      });
-      // pop loading circle
-      if (context.mounted) Navigator.pop(context);
-    } on FirebaseAuthException catch (e) {
-      // pop loading circle
-      if (mounted) {
-        Navigator.pop(context);
-      }
-      // show error to user
-      displayMessage(e.code);
-    }
-  }
-
-// Display a dialog message
-  void displayMessage(String message) {
-    showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              title: const Text(
-                'Oops!',
-                textAlign: TextAlign.center,
-              ),
-              content: Text(
-                message,
-                textAlign: TextAlign.center,
-              ),
-            ));
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,25 +30,21 @@ class _SignUpPageState extends State<SignUpPage> {
         body: SafeArea(
             child: Center(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30.0),
+            padding: EdgeInsets.symmetric(horizontal: 30.w),
             child: Column(
               children: [
                 // Welcome Image
                 Image.asset(
                   'lib/assets/images/register.png',
                 ),
-                const SizedBox(
-                  height: 30,
-                ),
+                30.ph,
                 // Welcome Back Message
                 Text('Hello There!',
                     style: TextStyle(
-                        fontSize: 30,
+                        fontSize: 30.sp,
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).primaryColor)),
-                const SizedBox(
-                  height: 20,
-                ),
+                20.ph,
 
                 // Email Textfield
                 MyTextField(
@@ -111,9 +54,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   prefixIcon: Icons.person,
                 ),
 
-                const SizedBox(
-                  height: 10,
-                ),
+                10.ph,
 
                 // Email Textfield
                 MyTextField(
@@ -123,30 +64,58 @@ class _SignUpPageState extends State<SignUpPage> {
                   prefixIcon: Icons.email,
                 ),
 
-                const SizedBox(
-                  height: 10,
-                ),
+                10.ph,
 
                 //  Password Textfield
                 MyPasswordField(
                   controller: passwordTextController,
                 ),
 
-                const SizedBox(height: 20),
+                20.ph,
 
                 // Sign Up Button
-                LoginRegisterButton(text: 'Sign Up', onPressed: signUp),
 
-                const SizedBox(
-                  height: 20,
+                Consumer<AuthViewModel>(
+                  builder: (context, authViewModel, child) {
+                    return authViewModel.isLoading
+                        ? const CircularProgressIndicator()
+                        : LoginRegisterButton(
+                            text: 'Sign Up',
+                            onPressed: () async {
+                              if (emailTextController.text.isEmpty &&
+                                  passwordTextController.text.isEmpty &&
+                                  fullNameTextController.text.isEmpty) {
+                                if (mounted) {
+                                  getAlert(context, 'Fill all fields');
+                                }
+                                return;
+                              }
+                              // Call the signIn method
+                              await authViewModel.signUpWithEmailPassword(
+                                  emailTextController.text,
+                                  passwordTextController.text,
+                                  fullNameTextController.text);
+
+                              if (authViewModel.errorMessage != null) {
+                                // Show a snackbar with the error message
+                                if (mounted) {
+                                  getAlert(
+                                      context, authViewModel.errorMessage!);
+                                }
+                                return;
+                              }
+                              if (mounted) {
+                                Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const LandingPage(),
+                                    ));
+                              }
+                            });
+                  },
                 ),
 
-                // Google Button
-                // GoogleAuthButton(text: 'Sign Up with Google', onPressed: () {}),
-
-                // const SizedBox(height: 20),
-
-                // Go to Register Page
+                20.ph,
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

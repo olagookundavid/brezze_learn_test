@@ -1,15 +1,15 @@
 import 'dart:io';
 
-import 'package:brezze_learn_test/controller/auth_controller.dart';
+import 'package:brezze_learn_test/auth/notifiiers/auth_notifier.dart';
+import 'package:brezze_learn_test/auth/notifiiers/post_notifier.dart';
+import 'package:brezze_learn_test/helper/alert_box.dart';
+import 'package:brezze_learn_test/helper/utils.dart';
 import 'package:brezze_learn_test/pages/auth/log_out.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import '../widgets/post.dart';
 
 class HomePage extends StatefulWidget {
@@ -20,68 +20,32 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-// Current User
-  final currentUser = FirebaseAuth.instance.currentUser!;
-  AuthController? authController;
 // Text Controller
   TextEditingController postController = TextEditingController();
-
-// Post Message Method
-  void postMessage(String image) {
-    // only post if there is something in the textfield
-    if (postController.text.isNotEmpty) {
-      FirebaseFirestore.instance.collection('user_posts').add({
-        'UserEmail': currentUser.email,
-        'Message': postController.text,
-        'TimeStamp': Timestamp.now(),
-        'Likes': [],
-        'image': image
-      });
-    }
-    postController.clear();
-  }
-
-// Sign User Out
-
-  double keyBoardHeight = 0;
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   WidgetsBinding.instance.addObserver(keyboard);
-  // }
-
-  // @override
-  // void dispose() {
-  //   WidgetsBinding.instance.removeObserver(keyboard);
-  //   super.dispose();
-  // }
-
-  // @override
-  // void keyboard() {
-  //   final double newKeyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-  //   setState(() {
-  //     keyBoardHeight = newKeyboardHeight;
-  //   });
-  // }
-  @override
-  void initState() {
-    super.initState();
-    authController = Get.put(AuthController());
-  }
-
+  late final ScrollController ctrl;
   File? postImage;
   @override
+  void initState() {
+    ctrl = ScrollController();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    debugPrint(MediaQuery.of(context).viewInsets.bottom.toString());
+    final currentUser = Provider.of<AuthViewModel>(context).user;
+    final postsViewModel = Provider.of<PostViewModel>(context);
     return Scaffold(
       backgroundColor: Colors.grey.shade200,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         centerTitle: true,
         elevation: 0,
         backgroundColor: Theme.of(context).primaryColor,
         title: Text(
           'ChatBox',
           style: GoogleFonts.rammettoOne(
-              color: Theme.of(context).primaryColorLight, fontSize: 24),
+              color: Theme.of(context).primaryColorLight, fontSize: 24.sp),
         ),
         actions: [
           Padding(
@@ -90,9 +54,9 @@ class _HomePageState extends State<HomePage> {
               onTap: () {
                 showModalBottomSheet(
                   isScrollControlled: true,
-                  shape: const RoundedRectangleBorder(
+                  shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(8),
+                      top: Radius.circular(10.r),
                     ),
                   ),
                   context: context,
@@ -114,7 +78,7 @@ class _HomePageState extends State<HomePage> {
             padding: EdgeInsets.only(bottom: 10.h),
             child: Center(
                 child: Text(
-              'Logged in as ${currentUser.email!}',
+              'Logged in as ${currentUser?.email!}',
               style: TextStyle(color: Colors.grey, fontSize: 15.sp),
             )),
           ),
@@ -135,6 +99,8 @@ class _HomePageState extends State<HomePage> {
                           ),
                         )
                       : ListView.builder(
+                          controller: ctrl,
+                          reverse: true,
                           itemCount: snapshot.data!.docs.length,
                           itemBuilder: ((context, index) {
                             // get the message
@@ -142,10 +108,6 @@ class _HomePageState extends State<HomePage> {
                             // post message (message + user email)
                             return Post(
                               post: post,
-                              // message: post['Message'],
-                              // user: post['UserEmail'],
-                              // postId: post.id,
-                              // likes: List<String>.from(post['Likes'] ?? []),
                             );
                           }),
                         );
@@ -154,16 +116,12 @@ class _HomePageState extends State<HomePage> {
                 }
                 return const Center(child: CircularProgressIndicator());
               },
-              stream: FirebaseFirestore.instance
-                  .collection('user_posts')
-                  .orderBy('TimeStamp', descending: false)
-                  .snapshots(),
+              stream: postsViewModel.getPostsStream(),
             ),
           ),
 // Post Text Field
           Padding(
-            padding:
-                const EdgeInsets.only(left: 20, right: 20, bottom: 0, top: 20),
+            padding: EdgeInsets.all(20.h),
             child: Column(
               children: [
                 Row(
@@ -192,23 +150,71 @@ class _HomePageState extends State<HomePage> {
                     ),
 
                     // Post Button
-                    IconButton(
-                        onPressed: () async {
-                          if (postImage == null) {
-                            postMessage('');
-                            return;
-                          }
-                          String imageUrl = await authController!
-                              .uploadImageToFirebaseStorage(postImage!);
-                          postImage = null;
-                          postMessage(imageUrl);
-                        },
-                        icon: Icon(Icons.arrow_circle_right,
-                            color: Theme.of(context).primaryColor, size: 34.r))
+                    Consumer<PostViewModel>(builder: (context, post, child) {
+                      return post.loading
+                          ? const CircularProgressIndicator()
+                          : IconButton(
+                              onPressed: () async {
+                                if (postController.text.isEmpty) {
+                                  if (mounted) {
+                                    getAlert(
+                                        context, 'Please pass in a message');
+                                  }
+                                  return;
+                                }
+                                if (postImage == null) {
+                                  await post.uploadPost(
+                                      currentUser!.email!, postController.text);
+                                  if (post.error != null) {
+                                    if (mounted) {
+                                      getAlert(context, post.error!);
+                                    }
+                                    return;
+                                  }
+                                  ctrl.animateTo(
+                                    ctrl.position.maxScrollExtent,
+                                    curve: Curves.easeOut,
+                                    duration: const Duration(milliseconds: 500),
+                                  );
+                                  if (mounted) {
+                                    getAlert(
+                                        context, 'Succesfully added a post');
+                                  }
+                                  postController.clear();
+                                  return;
+                                }
+                                await post.uploadPostImageToFirebaseStorage(
+                                    postImage!,
+                                    currentUser!.email!,
+                                    postController.text);
+                                if (post.error != null) {
+                                  if (mounted) {
+                                    getAlert(context, post.error!);
+                                  }
+                                  return;
+                                }
+                                ctrl.animateTo(
+                                  ctrl.position.maxScrollExtent,
+                                  curve: Curves.easeOut,
+                                  duration: const Duration(milliseconds: 500),
+                                );
+                                if (mounted) {
+                                  getAlert(context, 'Succesfully added a post');
+                                }
+                                postController.clear();
+                                postImage = null;
+                              },
+                              icon: Icon(Icons.arrow_circle_right,
+                                  color: Theme.of(context).primaryColor,
+                                  size: 34.r));
+                    })
                   ],
                 ),
-                if (MediaQuery.of(context).viewInsets.bottom < 10)
-                  const SizedBox(height: 100)
+                if (MediaQuery.of(Scaffold.of(context).context)
+                        .viewInsets
+                        .bottom <
+                    30)
+                  SizedBox(height: 80.h)
               ],
             ),
           ),
@@ -246,14 +252,12 @@ class _HomePageState extends State<HomePage> {
                     }
                   }
                 },
-                child: const Icon(
+                child: Icon(
                   Icons.camera_alt,
-                  size: 40,
+                  size: 40.h,
                 ),
               ),
-              const SizedBox(
-                width: 30,
-              ),
+              30.pw,
               InkWell(
                 onTap: () async {
                   final ImagePicker picker = ImagePicker();
@@ -268,9 +272,9 @@ class _HomePageState extends State<HomePage> {
                     }
                   }
                 },
-                child: const Icon(
+                child: Icon(
                   Icons.photo_library_rounded,
-                  size: 40,
+                  size: 40.r,
                 ),
               ),
             ],
@@ -280,3 +284,9 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
+
+    // print(MediaQuery.of(Scaffold.of(context).context).viewInsets.bottom);
+    // print(EdgeInsets.fromViewPadding(
+    //         View.of(context).viewInsets, View.of(context).devicePixelRatio)
+    //     .bottom);

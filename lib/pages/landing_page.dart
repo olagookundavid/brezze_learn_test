@@ -3,6 +3,7 @@ import 'package:brezze_learn_test/pages/profile_page.dart';
 import 'package:brezze_learn_test/pages/setting_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -39,8 +40,8 @@ class LandingPageState extends State<LandingPage> {
             child: screens[currentIndex],
           ),
           Padding(
-            padding:
-                EdgeInsets.only(top: MediaQuery.of(context).size.height - 100),
+            padding: EdgeInsets.only(
+                top: MediaQuery.of(context).size.height - 100.h),
             child: Container(
               margin: EdgeInsets.all(displayWidth * .05),
               height: displayWidth * .155,
@@ -117,10 +118,10 @@ class LandingPageState extends State<LandingPage> {
                                     index == currentIndex
                                         ? listOfStrings[index]
                                         : '',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600,
-                                      fontSize: 15,
+                                      fontSize: 15.sp,
                                     ),
                                   ),
                                 ),

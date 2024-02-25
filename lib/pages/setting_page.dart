@@ -1,5 +1,7 @@
 import 'package:brezze_learn_test/helper/storage_class.dart';
 import 'package:brezze_learn_test/helper/utils.dart';
+import 'package:brezze_learn_test/pages/auth/log_out.dart';
+import 'package:brezze_learn_test/widgets/settings_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,6 +21,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         centerTitle: true,
         elevation: 0,
         backgroundColor: Theme.of(context).primaryColor,
@@ -43,7 +46,7 @@ class _SettingsPageState extends State<SettingsPage> {
             20.ph,
             SettingsTiles(
               text: 'Enable Fingerprint/Face ID',
-              assest: 'enablefinger',
+              icon: Icons.fingerprint_rounded,
               switchWidget: Switch.adaptive(
                   inactiveTrackColor: Colors.grey.withOpacity(.5),
                   value: switchValueFingerPrint,
@@ -54,6 +57,24 @@ class _SettingsPageState extends State<SettingsPage> {
                     setState(() {});
                   }),
             ),
+            InkWell(
+              onTap: () {
+                showModalBottomSheet(
+                  isScrollControlled: true,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(8),
+                    ),
+                  ),
+                  context: context,
+                  builder: (context) => Logout(),
+                );
+              },
+              child: const SettingsTiles(
+                text: 'LogOut',
+                icon: Icons.logout_rounded,
+              ),
+            )
           ],
         ),
       ),
@@ -91,76 +112,6 @@ class SettingList extends StatelessWidget {
           color: Colors.grey,
         )
       ],
-    );
-  }
-}
-
-class SettingsTiles extends StatelessWidget {
-  const SettingsTiles({
-    super.key,
-    required this.text,
-    required this.assest,
-    this.switchWidget,
-    this.color,
-    this.text2,
-  });
-  final String text;
-  final String? text2;
-  final String assest;
-  final Widget? switchWidget;
-  final Color? color;
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 5.w),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          CircleAvatar(
-            radius: 15.r,
-            child: const Icon(Icons.fingerprint_rounded),
-          ),
-          15.pw,
-          text2 == null
-              ? Text(
-                  text,
-                  style: TextStyle(
-                      fontSize: 12.sp,
-                      color: color ?? const Color(0xff212121),
-                      fontWeight: FontWeight.w600),
-                )
-              : SizedBox(
-                  width: MediaQuery.of(context).size.width * .6,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        text,
-                        style: TextStyle(
-                            fontSize: 12.sp,
-                            color: color ?? const Color(0xff212121),
-                            fontWeight: FontWeight.w600),
-                      ),
-                      2.ph,
-                      Text(
-                        text2!,
-                        style: TextStyle(
-                            fontSize: 11.sp,
-                            color: const Color(0xff868FA0),
-                            fontWeight: FontWeight.w400),
-                      )
-                    ],
-                  ),
-                ),
-          const Spacer(),
-          switchWidget ??
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 15.5.r,
-                color: const Color(0xffBCBCBC),
-              )
-        ],
-      ),
     );
   }
 }

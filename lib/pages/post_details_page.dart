@@ -1,14 +1,21 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'package:brezze_learn_test/auth/notifiiers/auth_notifier.dart';
+import 'package:brezze_learn_test/auth/notifiiers/post_notifier.dart';
 import 'package:brezze_learn_test/components/comment.dart';
 import 'package:brezze_learn_test/components/delete_button.dart';
+import 'package:brezze_learn_test/helper/alert_box.dart';
 import 'package:brezze_learn_test/helper/helper_methods.dart';
 import 'package:brezze_learn_test/helper/utils.dart';
 import 'package:brezze_learn_test/widgets/buttons/comment_button.dart';
 import 'package:brezze_learn_test/widgets/buttons/like_button.dart';
+import 'package:brezze_learn_test/widgets/cache_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class PostDetail extends StatefulWidget {
   const PostDetail({super.key, required this.post});
@@ -19,8 +26,6 @@ class PostDetail extends StatefulWidget {
 }
 
 class _PostDetailState extends State<PostDetail> {
-  final currentUser = FirebaseAuth.instance.currentUser!;
-
 // Like Button - isLiked
   bool isLiked = false;
 
@@ -33,50 +38,15 @@ class _PostDetailState extends State<PostDetail> {
     super.initState();
     // if our current user's email is contained in the list of likes, isLiked = true
     isLiked = List<String>.from(widget.post['Likes'] ?? [])
-        .contains(currentUser.email);
-  }
-
-// Toggle 'like' button
-  void toggleLike() {
-    setState(() {
-      isLiked = !isLiked;
-    });
-
-// If User "Likes" Post -> Add it to Firebase
-    DocumentReference postRef =
-        FirebaseFirestore.instance.collection('user_posts').doc(widget.post.id);
-
-    if (isLiked) {
-      // if the post is now liked, add the user's email to the "Likes" field (in the postMessage method)
-      postRef.update({
-        "Likes": FieldValue.arrayUnion(
-            [currentUser.email]) // arrayUnion = "add to array"
-      });
-    } else {
-      // if the post is now unliked, remove the user's email form the "Likes" field
-      postRef.update({
-        "Likes": FieldValue.arrayRemove(
-            [currentUser.email]) // arrayRemove = "removes from array"
-      });
-    }
+        .contains(FirebaseAuth.instance.currentUser!.email);
   }
 
 // Add a Comment to Firestore -> create 'comments' collection
-  void addComment(String commentText) {
-    // adding collection called 'comments' to specific postId in 'user_posts' collection
-    FirebaseFirestore.instance
-        .collection('user_posts')
-        .doc(widget.post.id)
-        .collection('comments')
-        .add({
-      'CommentText': commentText,
-      'CommentedBy': currentUser.email,
-      'CommentTime': Timestamp.now()
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = Provider.of<AuthViewModel>(context).user;
+    final postsViewModel = Provider.of<PostViewModel>(context);
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(
@@ -111,7 +81,7 @@ class _PostDetailState extends State<PostDetail> {
                           fontWeight: FontWeight.w600),
                     ),
                     // Delete Post
-                    if (widget.post['UserEmail'] == currentUser.email)
+                    if (widget.post['UserEmail'] == currentUser?.email)
                       DeleteButton(
                         onTap: () {
                           // Delete post confirmation dialog box
@@ -133,7 +103,7 @@ class _PostDetailState extends State<PostDetail> {
                               // buttons
                               actions: [
                                 Padding(
-                                  padding: const EdgeInsets.only(bottom: 15.0),
+                                  padding: EdgeInsets.only(bottom: 15.h),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
@@ -152,59 +122,40 @@ class _PostDetailState extends State<PostDetail> {
                                               color: Colors.deepPurple),
                                         ),
                                       ),
-                                      const SizedBox(width: 10),
+                                      10.pw,
 
                                       // delete button
-                                      ElevatedButton(
-                                        onPressed: () async {
-                                          // delete the comments from firestore first
-                                          // if you only delete the post, the comments will still remain
+                                      Consumer<PostViewModel>(
+                                          builder: (context, post, child) {
+                                        return post.delLoading
+                                            ? const CircularProgressIndicator()
+                                            : ElevatedButton(
+                                                onPressed: () async {
+                                                  await post.deletePost(
+                                                      widget.post.id);
+                                                  if (post.error != null) {
+                                                    if (mounted) {
+                                                      getAlert(
+                                                          context, post.error!);
+                                                    }
+                                                    return;
+                                                  }
+                                                  if (mounted) {
+                                                    getAlert(context,
+                                                        'Successfully deleted all posts');
+                                                  }
 
-                                          // create variable called commentDocs
-                                          final commentDocs =
-                                              await FirebaseFirestore.instance
-                                                  .collection('user_posts')
-                                                  .doc(widget.post.id)
-                                                  .collection('comments')
-                                                  .get();
-
-                                          // delete the comments
-                                          for (var doc in commentDocs.docs) {
-                                            await FirebaseFirestore.instance
-                                                .collection('user_posts')
-                                                .doc(widget.post.id)
-                                                .collection('comments')
-                                                .doc(doc.id)
-                                                .delete()
-                                                .then((value) =>
-                                                    print('comments deleted'))
-                                                .catchError((error) =>
-                                                    'failed to delete comments: $error');
-                                          }
-
-                                          // then delete the post
-                                          FirebaseFirestore.instance
-                                              .collection('user_posts')
-                                              .doc(widget.post.id)
-                                              .delete()
-                                              .then(
-                                                (value) =>
-                                                    print('post deleted'),
-                                              )
-                                              .catchError(
-                                                (error) => print(
-                                                    'failed to delete post: $error'),
+                                                  Navigator.pop(context);
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text(
+                                                  'Delete',
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
                                               );
-
-                                          // dismiss the dialog
-                                          Navigator.pop(context);
-                                        },
-                                        child: const Text(
-                                          'Delete',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
+                                      }),
                                     ],
                                   ),
                                 ),
@@ -228,12 +179,8 @@ class _PostDetailState extends State<PostDetail> {
                     height: 200.h,
                     width: double.infinity,
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10.r),
-                      child: Image.network(
-                        widget.post['image'],
-                        fit: BoxFit.fill,
-                      ),
-                    ),
+                        borderRadius: BorderRadius.circular(10.r),
+                        child: CachedImageHelper(url: widget.post['image'])),
                   ),
                   3.ph,
                 ],
@@ -252,7 +199,7 @@ class _PostDetailState extends State<PostDetail> {
                         widget.post['Message'],
                         maxLines: 10,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 16),
+                        style: TextStyle(fontSize: 16.sp),
                       ),
                     ),
                   ],
@@ -265,10 +212,24 @@ class _PostDetailState extends State<PostDetail> {
             // like and comment buttons
             Row(
               children: [
-                LikeButton(
-                  isLiked: isLiked,
-                  onTap: toggleLike,
-                ),
+                Consumer<PostViewModel>(builder: (context, post, child) {
+                  return LikeButton(
+                    isLiked: isLiked,
+                    onTap: () {
+                      setState(() {
+                        isLiked = !isLiked;
+                      });
+
+                      if (isLiked) {
+                        // if the post is now liked, add the user's email to the "Likes" field (in the postMessage method)
+                        post.likePost(currentUser!.email!, widget.post.id);
+                      } else {
+                        // if the post is now unliked, remove the user's email form the "Likes" field
+                        post.unLikePost(currentUser!.email!, widget.post.id);
+                      }
+                    },
+                  );
+                }),
                 10.pw,
 
                 // add number of likes
@@ -278,7 +239,9 @@ class _PostDetailState extends State<PostDetail> {
                 10.pw,
 
                 // comment button
-                CommentButton(onTap: showCommentDialog),
+                CommentButton(onTap: () {
+                  showCommentDialog(widget.post.id);
+                }),
                 10.pw,
 
                 // add number of comments
@@ -290,12 +253,7 @@ class _PostDetailState extends State<PostDetail> {
             // Show Comments Under Post
             StreamBuilder<QuerySnapshot>(
               // listening for -> comments inside of user posts -> display in descending order based on comment time
-              stream: FirebaseFirestore.instance
-                  .collection('user_posts')
-                  .doc(widget.post.id)
-                  .collection('comments')
-                  .orderBy('CommentTime', descending: true)
-                  .snapshots(),
+              stream: postsViewModel.getCommentsStream(widget.post.id),
               builder: ((context, snapshot) {
                 // show loading circle if no data
                 if (!snapshot.hasData) {
@@ -328,7 +286,7 @@ class _PostDetailState extends State<PostDetail> {
     );
   }
 
-  void showCommentDialog() {
+  void showCommentDialog(String id) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -336,20 +294,23 @@ class _PostDetailState extends State<PostDetail> {
         title: const Text('Add Comment',
             textAlign: TextAlign.center,
             style: TextStyle(fontWeight: FontWeight.bold)),
-        content: TextFormField(
-          controller: _commentTextController,
-          decoration: const InputDecoration(
-            fillColor: Colors.white,
-            filled: true,
-            hintText: 'Write a comment...',
-            border: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.deepPurple),
+        content: SizedBox(
+          width: 400.w,
+          child: TextFormField(
+            controller: _commentTextController,
+            decoration: const InputDecoration(
+              fillColor: Colors.white,
+              filled: true,
+              hintText: 'Write a comment...',
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.deepPurple),
+              ),
             ),
           ),
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(bottom: 10.0),
+            padding: EdgeInsets.only(bottom: 10.h),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -370,21 +331,41 @@ class _PostDetailState extends State<PostDetail> {
                   ),
                 ),
 
-                const SizedBox(width: 10),
+                10.pw,
 
                 // post comment button
-                ElevatedButton(
-                  onPressed: () {
-                    // add comment on button press
-                    addComment(_commentTextController.text);
-                    // pop dialog box
-                    Navigator.pop(context);
-                    // clear controller
-                    _commentTextController.clear();
-                  },
-                  child: const Text('Post Comment',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
+                Consumer<PostViewModel>(builder: (context, postComment, child) {
+                  final currentUser = Provider.of<AuthViewModel>(context).user;
+                  return ElevatedButton(
+                    onPressed: () async {
+                      if (_commentTextController.text.isEmpty) {
+                        if (mounted) {
+                          getAlert(context, 'Please pass in a message');
+                        }
+
+                        return;
+                      }
+                      // add comment on button press
+                      await postComment.addComment(
+                          currentUser!.email!, id, _commentTextController.text);
+                      if (postComment.error != null) {
+                        if (mounted) {
+                          getAlert(context, postComment.error!);
+                        }
+                        return;
+                      }
+                      if (mounted) {
+                        getAlert(context, 'Succesfully added a comment');
+                      }
+                      // pop dialog box
+                      Navigator.pop(context);
+                      // clear controller
+                      _commentTextController.clear();
+                    },
+                    child: const Text('Post Comment',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                  );
+                }),
               ],
             ),
           ),

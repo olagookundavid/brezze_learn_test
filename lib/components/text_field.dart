@@ -15,9 +15,10 @@ class MyTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
+    return TextField(
       controller: controller,
       obscureText: obscureText,
+      keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(
         prefixIcon: Icon(prefixIcon),
         fillColor: Colors.white,

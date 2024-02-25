@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 class LoginRegisterButton extends StatelessWidget {
   final String text;
   final Function()? onPressed;
-  LoginRegisterButton({super.key, required this.text, required this.onPressed});
+  const LoginRegisterButton(
+      {super.key, required this.text, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
