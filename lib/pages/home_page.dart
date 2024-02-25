@@ -6,7 +6,6 @@ import 'package:brezze_learn_test/helper/alert_box.dart';
 import 'package:brezze_learn_test/helper/utils.dart';
 import 'package:brezze_learn_test/pages/auth/log_out.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_keyboard_size/flutter_keyboard_size.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
