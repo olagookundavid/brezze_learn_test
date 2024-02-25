@@ -34,7 +34,6 @@ To run the Chatbox app on your local machine, follow these simple steps:
 5. Connect your device or start an emulator/simulator.
 6. Run the app using `flutter run` command in the project directory.
 7. The app should launch on your device/emulator, and you can start exploring its features and functionalities.
-8. PLEASE TEST THE APP IN LIGHT MODE, AS DARK MODE IS NOT FULLY DEVELOPED!!!
 
 ## Links and Images
 
