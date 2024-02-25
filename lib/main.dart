@@ -52,9 +52,9 @@ class MyApp extends StatelessWidget {
             },
             child: GetMaterialApp(
                 useInheritedMediaQuery: false,
-                darkTheme: ThemeData.dark(
-                  useMaterial3: true,
-                ),
+                // darkTheme: ThemeData.dark(
+                //   useMaterial3: true,
+                // ),
                 theme: ThemeData(
                   useMaterial3: true,
                   colorScheme: ColorScheme(
