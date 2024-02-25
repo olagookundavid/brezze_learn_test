@@ -300,7 +300,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 15.w),
                                 child: Text(
-                                  'Save',
+                                  'Save Image',
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color:
