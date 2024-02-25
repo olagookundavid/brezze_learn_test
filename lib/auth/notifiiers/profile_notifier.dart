@@ -57,4 +57,12 @@ class ProfileViewModel with ChangeNotifier {
     _loading = false;
     notifyListeners();
   }
+
+  Stream<DocumentSnapshot> getProfileStream(String email) {
+    return fireStore
+        .collection('users')
+        // find doc of currentUser.email
+        .doc(email)
+        .snapshots();
+  }
 }

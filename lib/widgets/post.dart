@@ -82,10 +82,12 @@ class _PostState extends State<Post> {
                     Row(
                       children: [
                         Text(
-                          widget.post['UserEmail'],
+                          (widget.post['UserEmail'] == currentUser?.email)
+                              ? 'You'
+                              : widget.post['UserEmail'],
                           style: TextStyle(
-                              color: Colors.grey.shade400,
-                              fontWeight: FontWeight.w600),
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.w700),
                         ),
                         // Delete Post
                         if (widget.post['UserEmail'] == currentUser?.email)

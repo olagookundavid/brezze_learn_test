@@ -169,6 +169,8 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final currentUser = Provider.of<AuthViewModel>(context).user;
+
+    final profileViewModel = Provider.of<ProfileViewModel>(context);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -185,11 +187,7 @@ class _ProfilePageState extends State<ProfilePage> {
 // Body
       body: StreamBuilder<DocumentSnapshot>(
         // stream -> listening for collection of 'users'
-        stream: FirebaseFirestore.instance
-            .collection('users')
-            // find doc of currentUser.email
-            .doc(currentUser?.email)
-            .snapshots(),
+        stream: profileViewModel.getProfileStream(currentUser!.email!),
         builder: (context, snapshot) {
           // get user data
           if (snapshot.hasData) {
@@ -232,7 +230,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                 // User Email
                 Text(
-                  currentUser!.email!,
+                  currentUser.email!,
                   style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.bold,

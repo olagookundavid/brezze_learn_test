@@ -89,7 +89,8 @@ class _HomePageState extends State<HomePage> {
                   return snapshot.data!.docs.isEmpty
                       ? Center(
                           child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 15.w),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 15.w, vertical: 30.h),
                             child: Text(
                                 'Nothing to see yet, start sending messages to see chats',
                                 textAlign: TextAlign.justify,
