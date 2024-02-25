@@ -33,6 +33,7 @@ class LandingPageState extends State<LandingPage> {
   Widget build(BuildContext context) {
     double displayWidth = MediaQuery.of(context).size.width;
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           SizedBox(

@@ -309,7 +309,8 @@ class _ProfilePageState extends State<ProfilePage> {
                               ));
                     }),
                   ],
-                )
+                ),
+                30.ph
               ],
             );
             // error handlers

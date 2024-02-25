@@ -51,6 +51,7 @@ class MyApp extends StatelessWidget {
               unfocus();
             },
             child: GetMaterialApp(
+                useInheritedMediaQuery: false,
                 darkTheme: ThemeData.dark(
                   useMaterial3: true,
                 ),

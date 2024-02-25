@@ -6,6 +6,7 @@ import 'package:brezze_learn_test/helper/alert_box.dart';
 import 'package:brezze_learn_test/helper/utils.dart';
 import 'package:brezze_learn_test/pages/auth/log_out.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_keyboard_size/flutter_keyboard_size.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -28,6 +29,12 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     ctrl = ScrollController();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    ctrl.dispose();
+    super.dispose();
   }
 
   @override
@@ -120,7 +127,7 @@ class _HomePageState extends State<HomePage> {
               stream: postsViewModel.getPostsStream(),
             ),
           ),
-// Post Text Field
+          // Post Text Field
           Padding(
             padding: EdgeInsets.all(20.h),
             child: Column(
@@ -211,11 +218,11 @@ class _HomePageState extends State<HomePage> {
                     })
                   ],
                 ),
-                if (MediaQuery.of(Scaffold.of(context).context)
-                        .viewInsets
-                        .bottom <
-                    30)
+                if (MediaQuery.of(context).viewInsets.bottom < 200.h)
                   SizedBox(height: 80.h)
+                // Consumer<ScreenHeight>(builder: (context, res, child) {
+                //   return SizedBox(height: res.isOpen ? 1 : 80.h);
+                // })
               ],
             ),
           ),
